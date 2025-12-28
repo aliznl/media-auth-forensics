@@ -1,0 +1,18 @@
+[project]
+name = "media-auth-forensics"
+version = "0.1.0"
+description = "Multimodal AI for detecting AI-generated and human-manipulated images and videos using forensic, deep learning, and adversarial-robust methods."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Ali Zeinal" }]
+keywords = ["deepfake", "media-forensics", "security", "synthetic-media", "fraud-detection"]
+
+[project.scripts]
+media-auth-forensics = "media_auth_forensics.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
