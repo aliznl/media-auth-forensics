@@ -1,0 +1,227 @@
+aliznl27@yahoo.com
+
+MEDIA AUTH FORENSICS – HOW TO RUN AND USE
+=======================================
+
+This document explains how to install, run, and use the Media Auth Forensics application
+for detecting AI-generated and human-manipulated images and videos.
+
+The system supports:
+- Images and videos
+- Face-based and non-face content (documents, food, scenes, text)
+- Region-level irregularity detection (0/1 neighborhood maps)
+- Temporal analysis for videos
+- Adversarial robustness testing
+
+--------------------------------------------------
+1. SYSTEM REQUIREMENTS
+--------------------------------------------------
+
+Required:
+- Python 3.9 or newer
+- pip
+- Git
+- At least 8 GB RAM (16 GB recommended)
+- GPU optional but recommended for training/inference (NVIDIA CUDA)
+
+Supported OS:
+- Linux (recommended)
+- macOS
+- Windows (WSL recommended)
+
+--------------------------------------------------
+2. INSTALLATION
+--------------------------------------------------
+
+1) Clone the repository:
+   git clone https://github.com/<your-username>/media-auth-forensics.git
+   cd media-auth-forensics
+
+2) Create a virtual environment:
+   python -m venv venv
+
+3) Activate the environment:
+   Linux/macOS:
+     source venv/bin/activate
+   Windows:
+     venv\Scripts\activate
+
+4) Install dependencies:
+   pip install -r requirements.txt
+
+5) Install the package in editable mode:
+   pip install -e .
+
+--------------------------------------------------
+3. BASIC USAGE (INFERENCE)
+--------------------------------------------------
+
+The main entry point is the CLI.
+
+Command format:
+   media-auth-forensics infer --input <file> [options]
+
+### Analyze an image
+Example:
+   media-auth-forensics infer \
+     --input ./samples/image.jpg \
+     --out report.json
+
+### Analyze a video
+Example:
+   media-auth-forensics infer \
+     --input ./samples/video.mp4 \
+     --checkpoint ./exp/checkpoint_best.pt \
+     --device cuda \
+     --out report.json
+
+Output:
+- A JSON report containing:
+  - Final suspicion score
+  - Per-frame scores (for video)
+  - Region-level anomaly neighborhoods
+  - Temporal 0/1 manipulation pattern
+  - Optional face-based predictions
+  - Optional model-family probabilities
+
+--------------------------------------------------
+4. OPTIONAL PARAMETERS
+--------------------------------------------------
+
+--checkpoint <path>
+  Path to a trained manipulation detection model.
+  If omitted, only forensic (non-ML) analysis is performed.
+
+--id_checkpoint <path>
+  Path to a generator/model-family identification model.
+
+--device cpu|cuda
+  Choose computation device.
+  Default: cpu
+
+--max_frames <int>
+  Maximum number of frames analyzed in a video.
+  Default: 120
+
+--stride <int>
+  Analyze every N-th frame in videos.
+  Default: 5
+
+--no_adversarial
+  Disable adversarial robustness testing (faster inference).
+
+--------------------------------------------------
+5. ADVERSARIAL ROBUSTNESS TESTING
+--------------------------------------------------
+
+This mode evaluates how detection behaves under common bypass attempts
+(JPEG recompression, blur, DCT smoothing, crop/resize).
+
+Command:
+   media-auth-forensics adversarial_test \
+     --input_dir ./samples \
+     --output_dir ./adv_results
+
+Output:
+- One JSON file per image
+- Each file lists detection scores per adversarial transform
+
+Use this to:
+- Evaluate robustness
+- Identify weak points
+- Validate detection reliability before deployment
+
+--------------------------------------------------
+6. TRAINING A MODEL (FACEFORENSICS++)
+--------------------------------------------------
+
+This project includes a training script for fine-tuning on FaceForensics++ frames.
+
+Expected dataset layout:
+  data_root/
+    train/
+      real/
+      fake/
+    val/
+      real/
+      fake/
+
+Command:
+   python scripts/train_ffpp_xception.py \
+     --data_root /path/to/ffpp_frames \
+     --exp_dir ./exp \
+     --device cuda \
+     --epochs 20 \
+     --batch_size 32
+
+Output:
+- Checkpoints saved to ./exp/
+- Best model saved as:
+    ./exp/checkpoint_best.pt
+
+--------------------------------------------------
+7. OUTPUT INTERPRETATION
+--------------------------------------------------
+
+Key fields in output JSON:
+
+- final_score_max:
+  Highest detected manipulation score.
+
+- temporal_binary_pattern:
+  0 = likely real
+  1 = likely manipulated
+  Smoothed using a Kalman filter for videos.
+
+- regions:
+  List of suspicious image neighborhoods with bounding boxes.
+
+- face_predictions:
+  Face-level manipulation scores (if faces are present).
+
+- model_identifier:
+  Probabilities over known generator families (if enabled).
+
+IMPORTANT:
+Scores indicate likelihood, not legal proof.
+Human review is required for high-impact decisions.
+
+--------------------------------------------------
+8. SECURITY AND SAFETY NOTES
+--------------------------------------------------
+
+- Do not trust metadata alone.
+- Always combine automated detection with human review.
+- Apply file size limits in production environments.
+- Run adversarial testing regularly.
+- Retrain models periodically with new data.
+
+--------------------------------------------------
+9. COMMON ISSUES
+--------------------------------------------------
+
+- "Module not found":
+  Ensure `pip install -e .` was executed.
+
+- CUDA not detected:
+  Verify NVIDIA drivers and PyTorch CUDA installation.
+
+- RetinaFace not working:
+  The system will fall back to non-face analysis automatically.
+
+--------------------------------------------------
+10. VERSIONING
+--------------------------------------------------
+
+Current version: v0.1.0
+
+This version is intended for:
+- Research
+- Security evaluation
+- Controlled enterprise testing
+
+Interfaces may change before v1.0.
+
+--------------------------------------------------
+END OF DOCUMENT
+--------------------------------------------------
