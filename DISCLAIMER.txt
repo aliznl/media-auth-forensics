@@ -1,0 +1,17 @@
+DISCLAIMER
+
+This software is provided for research, security evaluation, and media authenticity
+analysis purposes only.
+
+The outputs of this system indicate likelihoods and patterns of manipulation.
+They do not constitute proof of wrongdoing, legal evidence, or definitive attribution.
+
+Users are responsible for:
+- Complying with applicable laws and regulations
+- Avoiding misuse or discriminatory applications
+- Applying human review before high-impact decisions
+
+The authors and contributors disclaim liability for misuse, misinterpretation,
+or reliance on automated outputs without appropriate safeguards.
+
+Use responsibly.
